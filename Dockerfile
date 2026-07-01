@@ -124,6 +124,13 @@ ADD https://github.com/libass/libass.git#$LIBASS_BRANCH /src
 COPY build/libass.sh /src/build.sh
 RUN bash -x /src/build.sh
 
+# Build libxml2
+FROM emsdk-base AS libxml2-builder
+ENV LIBXML2_VERSION=v2.12.10
+ADD https://github.com/GNOME/libxml2.git#$LIBXML2_VERSION /src
+COPY build/libxml2.sh /src/build.sh
+RUN bash -x /src/build.sh
+
 # Build zimg
 FROM emsdk-base AS zimg-builder
 ENV ZIMG_BRANCH=release-3.0.5
@@ -146,6 +153,7 @@ COPY --from=vorbis-builder $INSTALL_DIR $INSTALL_DIR
 COPY --from=libwebp-builder $INSTALL_DIR $INSTALL_DIR
 COPY --from=libass-builder $INSTALL_DIR $INSTALL_DIR
 COPY --from=zimg-builder $INSTALL_DIR $INSTALL_DIR
+COPY --from=libxml2-builder $INSTALL_DIR $INSTALL_DIR
 
 # Build ffmpeg
 FROM ffmpeg-base AS ffmpeg-builder
@@ -164,7 +172,8 @@ RUN bash -x /src/build.sh \
       --enable-libfreetype \
       --enable-libfribidi \
       --enable-libass \
-      --enable-libzimg 
+      --enable-libzimg \
+      --enable-libxml2 
 
 # Build ffmpeg.wasm
 FROM ffmpeg-builder AS ffmpeg-wasm-builder
@@ -192,7 +201,8 @@ ENV FFMPEG_LIBS \
       -lfribidi \
       -lharfbuzz \
       -lass \
-      -lzimg
+      -lzimg \
+      -lxml2
 RUN mkdir -p /src/dist/umd && bash -x /src/build.sh \
       ${FFMPEG_LIBS} \
       -o dist/umd/ffmpeg-core.js \
