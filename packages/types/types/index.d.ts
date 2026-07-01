@@ -126,6 +126,11 @@ export interface FFmpegCoreModule {
 
   exec: (...args: string[]) => Promise<number>;
   ffprobe: (...args: string[]) => Promise<number>;
+  mountOPFS: (mountPoint?: string) => Promise<string>;
+  mkdirp: (path: string) => Promise<boolean>;
+  writeFileOPFS: (path: string, data: Uint8Array | ArrayBuffer | string | number[]) => Promise<boolean>;
+  fileSize: (path: string) => Promise<number>;
+  readFileChunk: (path: string, offset: number, length: number) => Promise<Uint8Array>;
   reset: () => void;
   setLogger: (logger: (log: Log) => void) => void;
   setTimeout: (timeout: number) => void;

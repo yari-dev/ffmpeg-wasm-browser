@@ -28,9 +28,15 @@ CONF_FLAGS=(
   -lpostproc 
   -lswresample 
   -lswscale 
+  -Wno-deprecated-declarations
+  $LDFLAGS
   -sENVIRONMENT=web,worker
   -sMEMORY64=1                             # enable 64-bit wasm memory
   -sWASM_BIGINT                            # i64 values across JS<->wasm cross as BigInt (needed for MEMORY64)
+  -sWASMFS                                 # use the wasm-native filesystem layer
+  -sFORCE_FILESYSTEM                       # keep the JS FS API used by @ffmpeg/ffmpeg and the extension
+  -sJSPI                                   # OPFS-backed WasmFS operations are async under the hood
+  -sJSPI_EXPORTS=ffmpeg,ffprobe,ffwasm_mount_opfs,ffwasm_mkdirp,ffwasm_write_file,ffwasm_file_size,ffwasm_read_file_chunk
   -sUSE_SDL=2                              # use emscripten SDL2 lib port
   -sSTACK_SIZE=5MB                         # increase stack size to support libopus
   -sMODULARIZE                             # modularized to use as a library
@@ -46,7 +52,7 @@ CONF_FLAGS=(
   -sEXPORT_NAME="$EXPORT_NAME"             # required in browser env, so that user can access this module from window object
   -sEXPORTED_FUNCTIONS=$(node src/bind/ffmpeg/export.js) # exported functions
   -sEXPORTED_RUNTIME_METHODS=$(node src/bind/ffmpeg/export-runtime.js) # exported built-in functions
-  -lworkerfs.js
+  -lopfs.js
   --pre-js src/bind/ffmpeg/bind.js        # extra bindings, contains most of the ffmpeg.wasm javascript code
   # ffmpeg source code
   src/fftools/cmdutils.c 
@@ -57,6 +63,7 @@ CONF_FLAGS=(
   src/fftools/ffmpeg_opt.c 
   src/fftools/opt_common.c 
   src/fftools/ffprobe.c 
+  src/bind/ffmpeg/opfs.c
 )
 
 emcc "${CONF_FLAGS[@]}" $@

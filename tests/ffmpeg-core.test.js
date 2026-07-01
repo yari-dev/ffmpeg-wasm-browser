@@ -47,6 +47,14 @@ describe(genName("exec()"), () => {
     expect(await core.exec("-h")).to.equal(0);
   });
 
+  it("should expose OPFS helpers", () => {
+    expect("mountOPFS" in core).to.be.true;
+    expect("mkdirp" in core).to.be.true;
+    expect("writeFileOPFS" in core).to.be.true;
+    expect("fileSize" in core).to.be.true;
+    expect("readFileChunk" in core).to.be.true;
+  });
+
   it("should transcode", async () => {
     expect(await core.exec("-i", "video.mp4", "video.avi")).to.equal(0);
     const out = core.FS.readFile("video.avi");
